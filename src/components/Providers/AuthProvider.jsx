@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-import {createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut} from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import firebaseApp from '../../firebase/firebase.config';
 
 
@@ -8,37 +8,43 @@ export const AuthContext = createContext(null);
 //firebase auth instance
 const auth = getAuth(firebaseApp);
 
-const AuthProvider = ({children}) => {
+const AuthProvider = ({ children }) => {
 
-    const [user,setUser]=useState(null);
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const createUser = (email,password)=>{
-        return createUserWithEmailAndPassword(auth,email,password);
+
+    const createUser = (email, password) => {
+        setLoading(true);
+        return createUserWithEmailAndPassword(auth, email, password);
     }
 
-    const signIn = (email,password)=>{
-        return signInWithEmailAndPassword(auth,email,password);
+    const signIn = (email, password) => {
+        setLoading(true);
+        return signInWithEmailAndPassword(auth, email, password);
     }
 
-    const logOut = ()=>{
+    const logOut = () => {
         return signOut(auth);
     }
 
-    useEffect(()=>{
-        const unsubscribe = onAuthStateChanged(auth,curUser =>{
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, curUser => {
             setUser(curUser);
-            console.log('AuthState',curUser);
+            setLoading(false);
+            //console.log('AuthState',curUser);
         });
 
         //stop observing while unmounting
-        return ()=>{
+        return () => {
             return unsubscribe();
         }
-    },[]);
+    }, []);
 
 
-    const authInfo ={
+    const authInfo = {
         user,
+        loading,
         createUser,
         signIn,
         logOut,
